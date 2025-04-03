@@ -74,7 +74,7 @@ double weight (Point p, std::vector<Point> neighbors)
 int main(int argc, char* argv[])
 {
     
-  const std::string filename = (argc > 1) ? argv[1] : CGAL::data_file_path("data/meshes/eight.off");
+  const std::string filename = (argc > 1) ? argv[1] : CGAL::data_file_path("meshes/eight.off");
    
   Mesh mesh;
   if(!PMP::IO::read_polygon_mesh(filename, mesh))
