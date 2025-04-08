@@ -20,6 +20,7 @@
 #include <vector>
 #include <cmath>
 #include <queue>
+#include <unordered_map>
 
 #include <CGAL/Kd_tree.h>
 #include <CGAL/algorithm.h>
@@ -45,16 +46,19 @@ namespace PMP = CGAL::Polygon_mesh_processing;
 struct Weighted {
     Point point;
     double weight;
+    std::vector<Point> neighbors;
 
-    Weighted(Point point, double weight) : point(point), weight(weight) {}
+    Weighted(Point point, double weight, std::vector<Point> neighbors) : point(point), weight(weight), neighbors(neighbors) {}
    
 };
 
 struct CompareWeighted {
     bool operator()(const Weighted& a, const Weighted& b) {
-        return a.weight < b.weight; // Max-heap based on age
+        return a.weight < b.weight; // Max-heap
     }
 };
+
+
 
 const double minDistance = .02;
  
@@ -68,6 +72,36 @@ double weight (Point p, std::vector<Point> neighbors)
     
   return weight;
 }
+
+
+class BidirectionalMap {
+public:
+    // Maps to store the string-to-int and int-to-string mappings
+    std::unordered_map<Point, int> pntToInt;
+    std::unordered_map<int, Point> intToPnt;
+
+    // Insert a pair into the map
+    void insert(const Point& pnt, int num) {
+        pntToInt[pnt] = num;
+        intToPnt[num] = pnt;
+    }
+
+    // Get the integer corresponding to the point
+    int getInt(const Point& pnt) {
+        if (pntToInt.find(pnt) != pntToInt.end()) {
+            return pntToInt[pnt];
+        }
+        throw std::invalid_argument("Point not found!");
+    }
+
+    // Get the point corresponding to the integer
+    Point getPnt(int num) {
+        if (intToPnt.find(num) != intToPnt.end()) {
+            return intToPnt[num];
+        }
+        throw std::invalid_argument("Integer not found!");
+    }
+};
 
 
  
@@ -113,11 +147,6 @@ int main(int argc, char* argv[])
   Point query = points.front();
   Fuzzy_circle default_range(query, .02);
     
-  //std::optional<Point> any = tree.search_any_point(default_range);
-  //  if(any)
-  //     std::cout << *any << " is in the query circle\n";
-   //  else
-   //    std::cout << "Empty query circle\n";
     
   std::vector<Point> result;
   tree.search(std::back_inserter(result), default_range);
@@ -135,24 +164,44 @@ int main(int argc, char* argv[])
   std::copy(result.begin(), result.end(), std::ostream_iterator<Point>(out1, "\n"));
   out1.close();
     
+  //Building my data structures
+    
+    
   std::vector<Point> neighbors;
-  std::priority_queue<Weighted, std::vector<Weighted>, CompareWeighted> weightedHeap;
+
+  std::vector<Weighted> data;
+   
+  //std::vector<Weighted> weighted_points;
+ // std::priority_queue<Weighted, std::vector<Weighted>, CompareWeighted> weightedHeap;
   for (Point p : points)
   {
       Fuzzy_circle default_range(p,.02);
       tree.search(std::back_inserter(neighbors), default_range);
       double w = weight(p,neighbors);
-      weightedHeap.push({p,w});
+     // weightedHeap.push({p,w,neighbors});
+      data.push_back({p,w,neighbors});
       neighbors.clear();
       
   }
-    
- Weighted first = weightedHeap.top();
- weightedHeap.pop();
- Weighted second = weightedHeap.top();
- std::cout << "\nHeap check: " << first.weight << " > " << second.weight << "?" << std::endl;
-    
  
+  std::cout << "First weight before heap: "<< data.begin()->weight << "?" << std::endl;
+  std::make_heap(data.begin(), data.end(),CompareWeighted());
+  std::cout << "First weight after heap: "<< data.begin()->weight << "?" << std::endl;
+ //Weighted first = weightedHeap.top();
+// weightedHeap.pop();
+// Weighted second = weightedHeap.top();
+// std::cout << "\nHeap check: " << first.weight << " > " << second.weight << "?" << std::endl;
+    
+
+ BidirectionalMap bimap;
+ for(int i = 0; i < data.size(); ++i)
+ {
+     bimap.insert(data[i].point,i);
+ }
+  
+ std::cout << "Point -> " << data[42].point << " has point -> " << bimap.getInt(data[42].point) << std::endl;
+    
+ std::cout << "Index -> " << 42 << " has point -> " << bimap.getPnt(42) << std::endl;
     
 /*
  
