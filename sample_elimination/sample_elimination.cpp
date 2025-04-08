@@ -73,6 +73,40 @@ double weight (Point p, std::vector<Point> neighbors)
   return weight;
 }
 
+void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, BidirectionalMap bimap){
+    //traverse neighbors
+    //  - check their children in data, 2i + 1 and 2i + 2, move them down heap while one child is bigger 
+    //  - reassign the index in biMap 
+
+    for(Point n : neighbors){
+        do{
+            n_index = bimap.getInt(n);
+
+            if(n_index >= (data.size() / 2) - 1){
+                break;
+            }
+            
+            Point child1 = data.at(2 * n_index + 1);
+            Point child2 = data.at(2 * n_index + 2);
+
+            if(child1.weight > child2.weight){
+                if(child1.weight > n.weight){
+                    data[n_index] = child1;
+                    data[2 * n_index + 1] = n;
+
+                    bimap.swap(n, child1);
+                }
+            }else if(child2.weight > child1.weight){
+                if(child2.weight > n.weight){
+                    data[n_index] = child2;
+                    data[2 * n_index + 2] = n;
+
+                    bimap.swap(n, child2);
+                }
+            }
+        }while(child1.weight > n.weight || child2.weight > n)
+    }
+}
 
 class BidirectionalMap {
 public:
@@ -84,6 +118,15 @@ public:
     void insert(const Point& pnt, int num) {
         pntToInt[pnt] = num;
         intToPnt[num] = pnt;
+    }
+
+    //Swap two points indices in the map
+    void swap(const Point& pnt1, const Point& pnt2){
+        int pnt1_ind = getInt(pnt1);
+        int pnt2_ind = getInt(pnt2);
+
+        insert(pnt1, pnt2_ind);
+        insert(pnt2, pnt1_ind);
     }
 
     // Get the integer corresponding to the point
@@ -171,8 +214,6 @@ int main(int argc, char* argv[])
 
   std::vector<Weighted> data;
    
-  //std::vector<Weighted> weighted_points;
- // std::priority_queue<Weighted, std::vector<Weighted>, CompareWeighted> weightedHeap;
   for (Point p : points)
   {
       Fuzzy_circle default_range(p,.02);
@@ -187,10 +228,6 @@ int main(int argc, char* argv[])
   std::cout << "First weight before heap: "<< data.begin()->weight << "?" << std::endl;
   std::make_heap(data.begin(), data.end(),CompareWeighted());
   std::cout << "First weight after heap: "<< data.begin()->weight << "?" << std::endl;
- //Weighted first = weightedHeap.top();
-// weightedHeap.pop();
-// Weighted second = weightedHeap.top();
-// std::cout << "\nHeap check: " << first.weight << " > " << second.weight << "?" << std::endl;
     
 
  BidirectionalMap bimap;
@@ -202,6 +239,21 @@ int main(int argc, char* argv[])
  std::cout << "Point -> " << data[42].point << " has point -> " << bimap.getInt(data[42].point) << std::endl;
     
  std::cout << "Index -> " << 42 << " has point -> " << bimap.getPnt(42) << std::endl;
+
+
+ for(int i = 0; i < 40000; i++){
+    //traverse data vector from 0 -> k
+    //for heaviest weight 
+    // - traverse through neighbors and update weights
+
+    //make function for both of the below:
+    // - move adjusted neighbors down heap
+    // - update indices
+ }
+
+ for(int i = 40000; i < data.size(), i++){
+    //collect points and print them out
+ }
     
 /*
  
