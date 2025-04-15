@@ -73,41 +73,6 @@ double weight (Point p, std::vector<Point> neighbors)
   return weight;
 }
 
-void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, BidirectionalMap bimap){
-    //traverse neighbors
-    //  - check their children in data, 2i + 1 and 2i + 2, move them down heap while one child is bigger 
-    //  - reassign the index in biMap 
-
-    for(Point n : neighbors){
-        do{
-            n_index = bimap.getInt(n);
-
-            if(n_index >= (data.size() / 2) - 1){
-                break;
-            }
-
-            Point child1 = data.at(2 * n_index + 1);
-            Point child2 = data.at(2 * n_index + 2);
-
-            if(child1.weight > child2.weight){
-                if(child1.weight > n.weight){
-                    data[n_index] = child1;
-                    data[2 * n_index + 1] = n;
-
-                    bimap.swap(n, child1);
-                }
-            }else if(child2.weight > child1.weight){
-                if(child2.weight > n.weight){
-                    data[n_index] = child2;
-                    data[2 * n_index + 2] = n;
-
-                    bimap.swap(n, child2);
-                }
-            }
-        }while(child1.weight > n.weight || child2.weight > n)
-    }
-}
-
 class BidirectionalMap {
 public:
     // Maps to store the string-to-int and int-to-string mappings
@@ -146,7 +111,49 @@ public:
     }
 };
 
+void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, BidirectionalMap bimap){
+    //traverse neighbors
+    //  - check their children in data, 2i + 1 and 2i + 2, move them down heap while one child is bigger 
+    //  - reassign the index in biMap 
 
+    for(Point n : neighbors){
+        double curr_w = 0;
+        double child1_w = 0;
+        double child2_w = 0;
+
+        do{
+            int n_index = bimap.getInt(n);
+
+            if(n_index >= (data.size() / 2) - 1){
+                break;
+            }
+
+            Weighted curr = data.at(n_index);
+            Weighted child1 = data.at(2 * n_index + 1);
+            Weighted child2 = data.at(2 * n_index + 2);
+
+            curr_w = curr.weight;
+            child1_w = child1.weight;
+            child2_w = child2.weight;
+
+            if(child1.weight > child2.weight){
+                if(child1.weight > curr.weight){
+                    data[n_index] = child1;
+                    data[2 * n_index + 1] = curr;
+
+                    bimap.swap(n, child1.point);
+                }
+            }else if(child2.weight > child1.weight){
+                if(child2.weight > curr.weight){
+                    data[n_index] = child2;
+                    data[2 * n_index + 2] = curr;
+
+                    bimap.swap(n, child2.point);
+                }
+            }
+        }while(child1_w > curr_w || child2_w > curr_w);
+    }
+}
  
 int main(int argc, char* argv[])
 {
@@ -252,10 +259,10 @@ int main(int argc, char* argv[])
     // - update indices
  }
 
- for(int i = 40000; i < data.size(), i++){
+ for(int i = 40000; i < data.size(); i++){
     //collect points and print them out
     std::cout << "Points in the sample: \n" << std::endl;
-    std::cout << data[i].point << "\n" << std:endl;
+    std::cout << data[i].point << "\n" << std::endl;
  }
     
 /*

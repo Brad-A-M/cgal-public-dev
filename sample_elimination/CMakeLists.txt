@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.12...3.29)
 project( Triangle_mesh_sampling )
 
 find_package(CGAL REQUIRED)
-include(${CGAL_USE_FILE})
+# include(${CGAL_USE_FILE})
 
 create_single_source_cgal_program( "sample_elimination.cpp" )
 
