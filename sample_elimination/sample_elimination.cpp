@@ -85,7 +85,7 @@ void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, Bi
             if(n_index >= (data.size() / 2) - 1){
                 break;
             }
-            
+
             Point child1 = data.at(2 * n_index + 1);
             Point child2 = data.at(2 * n_index + 2);
 
@@ -236,7 +236,7 @@ int main(int argc, char* argv[])
      bimap.insert(data[i].point,i);
  }
   
- std::cout << "Point -> " << data[42].point << " has point -> " << bimap.getInt(data[42].point) << std::endl;
+ std::cout << "Point -> " << data[42].point << " has index -> " << bimap.getInt(data[42].point) << std::endl;
     
  std::cout << "Index -> " << 42 << " has point -> " << bimap.getPnt(42) << std::endl;
 
@@ -245,6 +245,7 @@ int main(int argc, char* argv[])
     //traverse data vector from 0 -> k
     //for heaviest weight 
     // - traverse through neighbors and update weights
+    update_indices(data[i].neighbors, data, bimap);
 
     //make function for both of the below:
     // - move adjusted neighbors down heap
@@ -253,6 +254,8 @@ int main(int argc, char* argv[])
 
  for(int i = 40000; i < data.size(), i++){
     //collect points and print them out
+    std::cout << "Points in the sample: \n" << std::endl;
+    std::cout << data[i].point << "\n" << std:endl;
  }
     
 /*
