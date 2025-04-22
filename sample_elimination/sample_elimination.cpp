@@ -116,10 +116,14 @@ void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, Bi
     //  - check their children in data, 2i + 1 and 2i + 2, move them down heap while one child is bigger 
     //  - reassign the index in biMap 
 
+    // std::cout << "Before traversing neighbors within update_indices\n" << std::endl;
+
     for(Point n : neighbors){
         double curr_w = 0;
         double child1_w = 0;
         double child2_w = 0;
+
+        // std::cout << "Right before while loop within update_indices\n" << std::endl;
 
         do{
             int n_index = bimap.getInt(n);
@@ -141,6 +145,8 @@ void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, Bi
                     data[n_index] = child1;
                     data[2 * n_index + 1] = curr;
 
+                    // std::cout << "Beofre swap w/ child1\n" << std::endl;
+
                     bimap.swap(n, child1.point);
                 }
             }else if(child2.weight > child1.weight){
@@ -148,17 +154,22 @@ void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, Bi
                     data[n_index] = child2;
                     data[2 * n_index + 2] = curr;
 
+                    // std::cout << "Beofre swap w/ child2\n" << std::endl;
+
                     bimap.swap(n, child2.point);
                 }
             }
         }while(child1_w > curr_w || child2_w > curr_w);
+
+        // std::cout << "After while loop\n" << std::endl;
     }
+    // std::cout << "Done in update indices\n";
 }
  
 int main(int argc, char* argv[])
 {
     
-  const std::string filename = (argc > 1) ? argv[1] : CGAL::data_file_path("meshes/eight.off");
+  const std::string filename = (argc > 1) ? argv[1] : CGAL::data_file_path("Data/meshes/eight.off");
    
   Mesh mesh;
   if(!PMP::IO::read_polygon_mesh(filename, mesh))
@@ -252,16 +263,19 @@ int main(int argc, char* argv[])
     //traverse data vector from 0 -> k
     //for heaviest weight 
     // - traverse through neighbors and update weights
+    for(Point p : data[i].neighbors){
+        int ind = bimap.getInt(p);
+        data[ind].weight = data[ind].weight - pow((1-sqrt(CGAL::squared_distance(p,data[i].point)))/(minDistance),8);
+    }
+
     update_indices(data[i].neighbors, data, bimap);
 
-    //make function for both of the below:
-    // - move adjusted neighbors down heap
-    // - update indices
+    std::cout << i << std::endl;
  }
 
+ std::cout << "Points in the sample: \n" << std::endl;
  for(int i = 40000; i < data.size(); i++){
     //collect points and print them out
-    std::cout << "Points in the sample: \n" << std::endl;
     std::cout << data[i].point << "\n" << std::endl;
  }
     
