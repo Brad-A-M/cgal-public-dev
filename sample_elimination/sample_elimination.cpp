@@ -60,14 +60,15 @@ struct CompareWeighted {
 
 
 
-const double minDistance = .02;
+const double minDistance = .01;
  
 double weight (Point p, std::vector<Point> neighbors)
 {
   double weight = 0;
   for(Point n : neighbors)
   {
-      weight = weight + pow((1-sqrt(CGAL::squared_distance(p,n)))/(minDistance),8);
+      
+      weight = weight + pow(1-(sqrt(CGAL::squared_distance(p,n))/minDistance),8);
   }
     
   return weight;
@@ -123,7 +124,7 @@ void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, Bi
         double child1_w = 0;
         double child2_w = 0;
 
-        // std::cout << "Right before while loop within update_indices\n" << std::endl;
+         std::cout << "Right before while loop within update_indices\n" << std::endl;
 
         do{
             int n_index = bimap.getInt(n);
@@ -139,6 +140,7 @@ void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, Bi
             curr_w = curr.weight;
             child1_w = child1.weight;
             child2_w = child2.weight;
+            std::cout<< "current weight: "<< curr.weight << " c1 weight: " << child1.weight << " c2 weight: " << child2.weight << std::endl;
 
             if(child1.weight > child2.weight){
                 if(child1.weight > curr.weight){
@@ -169,7 +171,7 @@ void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, Bi
 int main(int argc, char* argv[])
 {
     
-  const std::string filename = (argc > 1) ? argv[1] : CGAL::data_file_path("Data/meshes/eight.off");
+  const std::string filename = (argc > 1) ? argv[1] : CGAL::data_file_path("meshes/eight.off");
    
   Mesh mesh;
   if(!PMP::IO::read_polygon_mesh(filename, mesh))
@@ -183,7 +185,7 @@ int main(int argc, char* argv[])
   std::vector<Point> points;
   PMP::sample_triangle_mesh(mesh,
                               std::back_inserter(points),
-                              CGAL::parameters::number_of_points_per_area_unit(50000));
+                              CGAL::parameters::number_of_points_per_area_unit(20000));
    
    
   //Point_set point_set;
@@ -206,13 +208,13 @@ int main(int argc, char* argv[])
   tree.build<CGAL::Parallel_tag>();
     
   Point query = points.front();
-  Fuzzy_circle default_range(query, .02);
+  Fuzzy_circle default_range(query, minDistance);
     
     
   std::vector<Point> result;
   tree.search(std::back_inserter(result), default_range);
     
-  std::cout << "\nPoints in circle with center: " << query << " and radius: 0.02" << std::endl;
+  std::cout << "\nPoints in circle with center: " << query << " and radius:"<< minDistance << std::endl;
     
  
   for (size_t i = 0; i < result.size(); ++i) {
@@ -225,6 +227,8 @@ int main(int argc, char* argv[])
   std::copy(result.begin(), result.end(), std::ostream_iterator<Point>(out1, "\n"));
   out1.close();
     
+    
+    /*  Go over it from here
   //Building my data structures
     
     
@@ -234,7 +238,7 @@ int main(int argc, char* argv[])
    
   for (Point p : points)
   {
-      Fuzzy_circle default_range(p,.02);
+      Fuzzy_circle default_range(p,minDistance);
       tree.search(std::back_inserter(neighbors), default_range);
       double w = weight(p,neighbors);
      // weightedHeap.push({p,w,neighbors});
@@ -246,7 +250,13 @@ int main(int argc, char* argv[])
   std::cout << "First weight before heap: "<< data.begin()->weight << "?" << std::endl;
   std::make_heap(data.begin(), data.end(),CompareWeighted());
   std::cout << "First weight after heap: "<< data.begin()->weight << "?" << std::endl;
-    
+
+  std::vector<Point> max_weight;
+  max_weight.push_back(data.begin()->point);
+  std::ofstream out3("max_weight.xyz");
+  out3 << std::setprecision(17);
+  std::copy(max_weight.begin(), max_weight.end(), std::ostream_iterator<Point>(out3, "\n"));
+  out3.close();
 
  BidirectionalMap bimap;
  for(int i = 0; i < data.size(); ++i)
@@ -254,18 +264,18 @@ int main(int argc, char* argv[])
      bimap.insert(data[i].point,i);
  }
   
- std::cout << "Point -> " << data[42].point << " has index -> " << bimap.getInt(data[42].point) << std::endl;
+ //std::cout << "Point -> " << data[42].point << " has index -> " << bimap.getInt(data[42].point) << std::endl;
     
- std::cout << "Index -> " << 42 << " has point -> " << bimap.getPnt(42) << std::endl;
+// std::cout << "Index -> " << 42 << " has point -> " << bimap.getPnt(42) << std::endl;
 
 
- for(int i = 0; i < 40000; i++){
+ for(int i = 0; i < 10000; i++){
     //traverse data vector from 0 -> k
     //for heaviest weight 
     // - traverse through neighbors and update weights
     for(Point p : data[i].neighbors){
         int ind = bimap.getInt(p);
-        data[ind].weight = data[ind].weight - pow((1-sqrt(CGAL::squared_distance(p,data[i].point)))/(minDistance),8);
+        data[ind].weight = data[ind].weight - pow((1-(sqrt(CGAL::squared_distance(p,data[i].point))/minDistance)),8);
     }
 
     update_indices(data[i].neighbors, data, bimap);
@@ -273,12 +283,19 @@ int main(int argc, char* argv[])
     std::cout << i << std::endl;
  }
 
- std::cout << "Points in the sample: \n" << std::endl;
- for(int i = 40000; i < data.size(); i++){
+ std::vector<Point> sample;
+ //std::cout << "Points in the sample: \n" << std::endl;
+ for(int i = 10000; i < data.size(); i++){
     //collect points and print them out
-    std::cout << data[i].point << "\n" << std::endl;
+    sample.push_back(data[i].point);
+   // std::cout << data[i].point << "\n" << std::endl;
  }
     
+    
+ std::ofstream out2("finial_sample.xyz");
+ out2 << std::setprecision(17);
+ std::copy(sample.begin(), sample.end(), std::ostream_iterator<Point>(out2, "\n"));
+ out2.close();
 /*
  
   // Query tree in parallel
@@ -301,5 +318,6 @@ int main(int argc, char* argv[])
                        }
                      });
  */
+    
   return 0;
 }
