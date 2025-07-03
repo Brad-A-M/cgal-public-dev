@@ -76,7 +76,7 @@ double weight (Point p, std::vector<Point> neighbors)
 
 class BidirectionalMap {
 public:
-    // Maps to store the string-to-int and int-to-string mappings
+    // Maps to store the point-to-int and int-to-point mappings
     std::unordered_map<Point, int> pntToInt;
     std::unordered_map<int, Point> intToPnt;
 
@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
   out1.close();
     
     
-    /*  Go over it from here
+   
   //Building my data structures
     
     
@@ -246,18 +246,21 @@ int main(int argc, char* argv[])
       neighbors.clear();
       
   }
- 
+    
+   
   std::cout << "First weight before heap: "<< data.begin()->weight << "?" << std::endl;
   std::make_heap(data.begin(), data.end(),CompareWeighted());
   std::cout << "First weight after heap: "<< data.begin()->weight << "?" << std::endl;
-
+   
+    /*
   std::vector<Point> max_weight;
   max_weight.push_back(data.begin()->point);
   std::ofstream out3("max_weight.xyz");
   out3 << std::setprecision(17);
   std::copy(max_weight.begin(), max_weight.end(), std::ostream_iterator<Point>(out3, "\n"));
   out3.close();
-
+*/
+    
  BidirectionalMap bimap;
  for(int i = 0; i < data.size(); ++i)
  {
