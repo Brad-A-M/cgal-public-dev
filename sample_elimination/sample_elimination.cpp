@@ -266,12 +266,12 @@ int main(int argc, char* argv[])
  {
      bimap.insert(data[i].point,i);
  }
-  
- //std::cout << "Point -> " << data[42].point << " has index -> " << bimap.getInt(data[42].point) << std::endl;
+    /*Commented shows an example of bimap
+        std::cout << "Point -> " << data[42].point << " has index -> " << bimap.getInt(data[42].point) << std::endl;
     
-// std::cout << "Index -> " << 42 << " has point -> " << bimap.getPnt(42) << std::endl;
-
-
+      std::cout << "Index -> " << 42 << " has point -> " << bimap.getPnt(42) << std::endl;
+*/
+    /*
  for(int i = 0; i < 10000; i++){
     //traverse data vector from 0 -> k
     //for heaviest weight 
@@ -286,6 +286,7 @@ int main(int argc, char* argv[])
     std::cout << i << std::endl;
  }
 
+   
  std::vector<Point> sample;
  //std::cout << "Points in the sample: \n" << std::endl;
  for(int i = 10000; i < data.size(); i++){
@@ -299,7 +300,9 @@ int main(int argc, char* argv[])
  out2 << std::setprecision(17);
  std::copy(sample.begin(), sample.end(), std::ostream_iterator<Point>(out2, "\n"));
  out2.close();
-/*
+*/
+    
+    /*
  
   // Query tree in parallel
   std::vector<std::vector<Point> > neighbors (points.size());
