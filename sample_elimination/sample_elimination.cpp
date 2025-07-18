@@ -60,7 +60,7 @@ struct CompareWeighted {
 
 
 
-const double minDistance = .01;
+const double minDistance = .015;
  
 double weight (Point p, std::vector<Point> neighbors)
 {
@@ -128,7 +128,8 @@ void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, Bi
 
         do{
             int n_index = bimap.getInt(n);
-
+            
+            //Exit if no children
             if(n_index >= (data.size() / 2) - 1){
                 break;
             }
@@ -136,7 +137,8 @@ void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, Bi
             Weighted curr = data.at(n_index);
             Weighted child1 = data.at(2 * n_index + 1);
             Weighted child2 = data.at(2 * n_index + 2);
-
+            
+            double temp_weight;
             curr_w = curr.weight;
             child1_w = child1.weight;
             child2_w = child2.weight;
@@ -150,15 +152,21 @@ void update_indices(std::vector<Point> neighbors, std::vector<Weighted> data, Bi
                     // std::cout << "Beofre swap w/ child1\n" << std::endl;
 
                     bimap.swap(n, child1.point);
+                    temp_weight = curr_w;
+                    child1_w = curr_w;
+                    curr_w = temp_weight;
                 }
-            }else if(child2.weight > child1.weight){
+            }else if(child2.weight >= child1.weight){
                 if(child2.weight > curr.weight){
                     data[n_index] = child2;
                     data[2 * n_index + 2] = curr;
-
+                    
                     // std::cout << "Beofre swap w/ child2\n" << std::endl;
 
                     bimap.swap(n, child2.point);
+                    temp_weight = curr_w;
+                    child2_w = curr_w;
+                    curr_w = temp_weight;
                 }
             }
         }while(child1_w > curr_w || child2_w > curr_w);
@@ -185,7 +193,7 @@ int main(int argc, char* argv[])
   std::vector<Point> points;
   PMP::sample_triangle_mesh(mesh,
                               std::back_inserter(points),
-                              CGAL::parameters::number_of_points_per_area_unit(2000));
+                              CGAL::parameters::number_of_points_per_area_unit(4000));
    
    
   //Point_set point_set;
@@ -247,12 +255,12 @@ int main(int argc, char* argv[])
       
   }
     
-   
+    /*check to see heap is created
   std::cout << "First weight before heap: "<< data.begin()->weight << "?" << std::endl;
   std::make_heap(data.begin(), data.end(),CompareWeighted());
   std::cout << "First weight after heap: "<< data.begin()->weight << "?" << std::endl;
-   
-    /*
+     */
+    /*Output max weight to check weight function
   std::vector<Point> max_weight;
   max_weight.push_back(data.begin()->point);
   std::ofstream out3("max_weight.xyz");
@@ -271,26 +279,25 @@ int main(int argc, char* argv[])
     
       std::cout << "Index -> " << 42 << " has point -> " << bimap.getPnt(42) << std::endl;
 */
- for(int i = 0; i < 1000; i++){
+ for(int i = 0; i < 2000; i++){
     //traverse data vector from 0 -> k
     //for heaviest weight 
     // - traverse through neighbors and update weights
     for(Point n : data[i].neighbors){
-        int n_ind = bimap.getInt(n);
-        data[n_ind].weight = data[n_ind].weight - pow((1-(sqrt(CGAL::squared_distance(n,data[i].point))/minDistance)),8);
-     std::cout << "Getting here" << std::endl;
+        int n_index = bimap.getInt(n);
+        data[n_index].weight = data[n_index].weight - pow((1-(sqrt(CGAL::squared_distance(n,data[i].point))/minDistance)),8);
     }
-
-    //update_indices(data[i].neighbors, data, bimap);
+     // Todo: Pass by reference where appropriate
+    update_indices(data[i].neighbors, data, bimap);
 
     std::cout << i << std::endl;
  }
 
-    /*
+  
 
  std::vector<Point> sample;
  //std::cout << "Points in the sample: \n" << std::endl;
- for(int i = 1000; i < data.size(); i++){
+ for(int i = 2000; i < data.size(); i++){
     //collect points and print them out
     sample.push_back(data[i].point);
    // std::cout << data[i].point << "\n" << std::endl;
@@ -301,7 +308,7 @@ int main(int argc, char* argv[])
  out2 << std::setprecision(17);
  std::copy(sample.begin(), sample.end(), std::ostream_iterator<Point>(out2, "\n"));
  out2.close();
-*/
+
     
     /*
  
