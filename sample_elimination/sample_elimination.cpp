@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
   std::vector<Point> points;
   PMP::sample_triangle_mesh(mesh,
                               std::back_inserter(points),
-                              CGAL::parameters::number_of_points_per_area_unit(20000));
+                              CGAL::parameters::number_of_points_per_area_unit(2000));
    
    
   //Point_set point_set;
@@ -271,25 +271,26 @@ int main(int argc, char* argv[])
     
       std::cout << "Index -> " << 42 << " has point -> " << bimap.getPnt(42) << std::endl;
 */
-    /*
- for(int i = 0; i < 10000; i++){
+ for(int i = 0; i < 1000; i++){
     //traverse data vector from 0 -> k
     //for heaviest weight 
     // - traverse through neighbors and update weights
-    for(Point p : data[i].neighbors){
-        int ind = bimap.getInt(p);
-        data[ind].weight = data[ind].weight - pow((1-(sqrt(CGAL::squared_distance(p,data[i].point))/minDistance)),8);
+    for(Point n : data[i].neighbors){
+        int n_ind = bimap.getInt(n);
+        data[n_ind].weight = data[n_ind].weight - pow((1-(sqrt(CGAL::squared_distance(n,data[i].point))/minDistance)),8);
+     std::cout << "Getting here" << std::endl;
     }
 
-    update_indices(data[i].neighbors, data, bimap);
+    //update_indices(data[i].neighbors, data, bimap);
 
     std::cout << i << std::endl;
  }
 
-   
+    /*
+
  std::vector<Point> sample;
  //std::cout << "Points in the sample: \n" << std::endl;
- for(int i = 10000; i < data.size(); i++){
+ for(int i = 1000; i < data.size(); i++){
     //collect points and print them out
     sample.push_back(data[i].point);
    // std::cout << data[i].point << "\n" << std::endl;
